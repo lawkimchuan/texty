@@ -1,0 +1,14 @@
+# User-saved text files
+files/*.txt
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor directories
+.vscode/
+.idea/
+
+# Logs
+*.log
