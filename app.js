@@ -203,6 +203,7 @@ async function loadFileList() {
     files.forEach(name => {
       const li = document.createElement('li');
       const span = document.createElement('span');
+      const btnRen = document.createElement('button');
       const btnDel = document.createElement('button');
 
       span.textContent = name;
@@ -210,12 +211,18 @@ async function loadFileList() {
       span.title = name;
       span.addEventListener('click', () => openFromServer(name));
 
+      btnRen.textContent = '✎';
+      btnRen.className = 'btn-rename';
+      btnRen.title = `Rename ${name}`;
+      btnRen.addEventListener('click', e => { e.stopPropagation(); renameOnServer(name); });
+
       btnDel.textContent = '✕';
       btnDel.className = 'btn-delete';
       btnDel.title = `Delete ${name}`;
       btnDel.addEventListener('click', e => { e.stopPropagation(); deleteFromServer(name, li); });
 
       li.appendChild(span);
+      li.appendChild(btnRen);
       li.appendChild(btnDel);
       fragment.appendChild(li);
     });
@@ -242,6 +249,26 @@ async function openFromServer(filename) {
     }
   } catch {
     setStatus('Network error — could not load file', true);
+  }
+}
+
+async function renameOnServer(oldName) {
+  const base = oldName.replace(/\.txt$/i, '');
+  const input = prompt(`Rename "${oldName}" to:`, base);
+  if (input === null) return; // cancelled
+  const newName = normalizeFilename(input.trim());
+  if (newName === oldName) return;
+  try {
+    const res = await apiFetch('rename', { oldFilename: oldName, newFilename: newName });
+    if (res.ok) {
+      if (filenameInput.value === oldName) filenameInput.value = newName;
+      setStatus(`Renamed "${oldName}" to "${newName}"`);
+      loadFileList();
+    } else {
+      setStatus(`Error: ${res.message || 'Rename failed'}`, true);
+    }
+  } catch {
+    setStatus('Network error — could not rename file', true);
   }
 }
 

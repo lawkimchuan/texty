@@ -246,6 +246,7 @@ button:active {
   color: var(--accent);
 }
 
+.file-list .btn-rename,
 .file-list .btn-delete {
   background: none;
   border: none;
@@ -253,6 +254,10 @@ button:active {
   padding: 4px 6px;
   font-size: 14px;
   flex-shrink: 0;
+}
+.file-list .btn-rename:hover {
+  color: var(--accent);
+  background: transparent;
 }
 .file-list .btn-delete:hover {
   color: var(--error);

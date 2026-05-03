@@ -37,6 +37,7 @@ match ($action) {
     'load'   => handleLoad($body),
     'list'   => handleList(),
     'delete' => handleDelete($body),
+    'rename' => handleRename($body),
     default  => respond(false, 'Unknown action', 400),
 };
 
@@ -96,6 +97,26 @@ function handleDelete(array $body): void
     if (!unlink($path)) respond(false, 'Could not delete file', 500);
 
     respond(true, 'File deleted');
+}
+
+function handleRename(array $body): void
+{
+    $oldName = sanitizeFilename($body['oldFilename'] ?? '');
+    $newName = sanitizeFilename($body['newFilename'] ?? '');
+
+    if (!$oldName) respond(false, 'Invalid old filename', 400);
+    if (!$newName) respond(false, 'Invalid new filename', 400);
+
+    $oldPath = resolveFilePath($oldName);
+    $newPath = resolveFilePath($newName);
+
+    if ($oldPath === null || !is_file($oldPath)) respond(false, 'File not found', 404);
+    if ($newPath === null)                        respond(false, 'Invalid new filename', 400);
+    if (is_file($newPath))                        respond(false, 'A file with that name already exists', 409);
+
+    if (!rename($oldPath, $newPath)) respond(false, 'Could not rename file', 500);
+
+    respond(true, 'File renamed');
 }
 
 // ── File Path Helpers ──────────────────────────────────────────────
