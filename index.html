@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plain Text Editor</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" id="meta-theme-color" content="#f5f5f0" />
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="TextEdit" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Main App -->
+  <div id="app">
+
+    <!-- Toolbar -->
+    <header class="toolbar">
+      <div class="toolbar-left">
+        <button id="btn-new" title="New document">New</button>
+        <button id="btn-open-device" title="Open from device">Open</button>
+        <input id="file-input" type="file" accept=".txt,text/plain" hidden />
+        <button id="btn-open-server" title="Open from server">Files</button>
+      </div>
+      <div class="toolbar-center">
+        <input id="filename-input" type="text" value="untitled.txt" aria-label="Filename" spellcheck="false" />
+      </div>
+      <div class="toolbar-right">
+        <button id="btn-save-server" title="Save to server">Save</button>
+        <button id="btn-download" title="Download to device">Download</button>
+        <button id="btn-theme" title="Toggle dark/light mode" aria-label="Toggle theme">☀️</button>
+      </div>
+    </header>
+
+    <!-- File Browser Sidebar -->
+    <div id="sidebar" class="sidebar" hidden>
+      <div class="sidebar-header">
+        <span>Server Files</span>
+        <button id="btn-sidebar-close" aria-label="Close file browser">✕</button>
+      </div>
+      <ul id="file-list" class="file-list" role="listbox" aria-label="Server files"></ul>
+      <p id="file-list-empty" class="muted" hidden>No files saved yet.</p>
+    </div>
+    <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+    <!-- Editor -->
+    <main class="editor-wrap">
+      <textarea id="editor" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="Start typing…"
+        aria-label="Text editor"></textarea>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+      <span id="status-words">0 words</span>
+      <span class="sep">·</span>
+      <span id="status-chars">0 chars</span>
+      <span class="sep">·</span>
+      <span id="status-save" class="muted">Draft saved locally</span>
+    </footer>
+
+  </div><!-- /#app -->
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>
