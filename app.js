@@ -8,6 +8,8 @@
 const API = 'api.php';
 
 const LS_THEME = 'pte_theme';
+const LS_LINE_NUMBERS = 'pte_line_numbers';
+const LS_RULED = 'pte_ruled';
 
 // ── Element refs ───────────────────────────────────────────────────
 const appEl = document.getElementById('app');
@@ -21,6 +23,11 @@ const btnOpenServer = document.getElementById('btn-open-server');
 const btnSaveServer = document.getElementById('btn-save-server');
 const btnDownload = document.getElementById('btn-download');
 const btnTheme = document.getElementById('btn-theme');
+const btnLineNumbers = document.getElementById('btn-line-numbers');
+const btnRuled = document.getElementById('btn-ruled');
+
+const editorWrap = document.querySelector('.editor-wrap');
+const lineNumbers = document.getElementById('line-numbers');
 
 const sidebar = document.getElementById('sidebar');
 const sidebarBackdrop = document.getElementById('sidebar-backdrop');
@@ -40,6 +47,8 @@ let localFileHandle = null;
 // ── Boot ───────────────────────────────────────────────────────────
 (function init() {
   applyTheme(localStorage.getItem(LS_THEME) || 'light');
+  applyLineNumbers(localStorage.getItem(LS_LINE_NUMBERS) === 'true');
+  applyRuled(localStorage.getItem(LS_RULED) === 'true');
   showApp();
   registerServiceWorker();
 })();
@@ -78,6 +87,7 @@ btnOpenDevice.addEventListener('click', async () => {
       editor.value = text;
       filenameInput.value = sanitizeFilename(file.name);
       updateCounts();
+      updateLineNumbers();
       setStatus(`Opened "${file.name}" from device`);
       editor.focus();
       return;
@@ -99,6 +109,7 @@ fileInput.addEventListener('change', async () => {
   filenameInput.value = sanitizeFilename(file.name);
   localFileHandle = null;
   updateCounts();
+  updateLineNumbers();
   setStatus(`Opened "${file.name}" from device`);
   editor.focus();
 });
@@ -241,6 +252,7 @@ async function openFromServer(filename) {
       filenameInput.value = filename;
       localFileHandle = null;
       updateCounts();
+      updateLineNumbers();
       setStatus(`Opened "${filename}" from server`);
       closeSidebar();
       editor.focus();
@@ -291,13 +303,105 @@ async function deleteFromServer(filename, liEl) {
 // ── Auto-save (word/char count on input) ──────────────────────────
 editor.addEventListener('input', () => {
   updateCounts();
+  updateLineNumbers();
 });
+
+editor.addEventListener('scroll', () => {
+  lineNumbers.scrollTop = editor.scrollTop;
+  syncRuledBackground();
+});
+
+function syncRuledBackground() {
+  if (!editorWrap.classList.contains('show-ruled')) return;
+  const lh = parseFloat(getComputedStyle(editor).lineHeight);
+  const offset = (24 - editor.scrollTop) % lh;
+  editor.style.backgroundPositionY = (offset <= 0 ? offset + lh : offset) + 'px';
+}
 
 // ── Theme Toggle ───────────────────────────────────────────────────
 btnTheme.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
   applyTheme(current === 'dark' ? 'light' : 'dark');
 });
+
+// ── Line Numbers Toggle ────────────────────────────────────────────
+btnLineNumbers.addEventListener('click', () => {
+  applyLineNumbers(!editorWrap.classList.contains('show-lines'));
+});
+
+function applyLineNumbers(on) {
+  editorWrap.classList.toggle('show-lines', on);
+  btnLineNumbers.setAttribute('aria-pressed', String(on));
+  btnLineNumbers.style.color = on ? 'var(--accent)' : '';
+  localStorage.setItem(LS_LINE_NUMBERS, String(on));
+  if (on) updateLineNumbers();
+}
+
+// ── Ruled Lines Toggle ────────────────────────────────────────────
+btnRuled.addEventListener('click', () => {
+  applyRuled(!editorWrap.classList.contains('show-ruled'));
+});
+
+function applyRuled(on) {
+  editorWrap.classList.toggle('show-ruled', on);
+  btnRuled.setAttribute('aria-pressed', String(on));
+  btnRuled.style.color = on ? 'var(--accent)' : '';
+  localStorage.setItem(LS_RULED, String(on));
+  if (on) syncRuledBackground();
+  else editor.style.backgroundPositionY = '';
+}
+
+let _mirror = null;
+function getMirror() {
+  if (_mirror) return _mirror;
+  _mirror = document.createElement('div');
+  _mirror.setAttribute('aria-hidden', 'true');
+  Object.assign(_mirror.style, {
+    position: 'absolute', top: '-9999px', left: '-9999px',
+    visibility: 'hidden', whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word', overflowWrap: 'break-word',
+    boxSizing: 'border-box',
+  });
+  document.body.appendChild(_mirror);
+  return _mirror;
+}
+
+function updateLineNumbers() {
+  if (!editorWrap.classList.contains('show-lines')) return;
+
+  const cs = getComputedStyle(editor);
+  const lineHeight = parseFloat(cs.lineHeight);
+  const contentWidth = editor.clientWidth
+    - parseFloat(cs.paddingLeft)
+    - parseFloat(cs.paddingRight);
+
+  const m = getMirror();
+  Object.assign(m.style, {
+    width: contentWidth + 'px',
+    fontFamily: cs.fontFamily,
+    fontSize: cs.fontSize,
+    lineHeight: cs.lineHeight,
+  });
+
+  const lines = editor.value.split('\n');
+  let lineNum = 1;
+  let text = '';
+
+  for (const line of lines) {
+    m.textContent = line || '\u200b'; // zero-width space keeps empty lines measurable
+    const rows = Math.max(1, Math.round(m.scrollHeight / lineHeight));
+    for (let r = 0; r < rows; r++) {
+      text += lineNum++ + '\n';
+    }
+  }
+
+  lineNumbers.textContent = text;
+  lineNumbers.scrollTop = editor.scrollTop;
+}
+
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(() => updateLineNumbers()).observe(editor);
+}
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);

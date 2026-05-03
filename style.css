@@ -280,6 +280,34 @@ button:active {
   overflow: hidden;
 }
 
+/* Line number gutter — hidden by default */
+.line-numbers {
+  display: none;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 24px 10px 24px 16px;
+  background: var(--toolbar-bg);
+  border-right: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--fg-muted);
+  text-align: right;
+  user-select: none;
+  pointer-events: none;
+  white-space: pre;
+}
+
+/* Show gutter when toggled on */
+.editor-wrap.show-lines .line-numbers {
+  display: block;
+}
+
+/* Indent editor content to align with gutter */
+.editor-wrap.show-lines #editor {
+  padding-left: 16px;
+}
+
 #editor {
   flex: 1;
   width: 100%;
@@ -290,7 +318,7 @@ button:active {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.7;
   padding: 24px;
   tab-size: 4;
@@ -298,6 +326,20 @@ button:active {
   transition:
     background 0.2s,
     color 0.2s;
+}
+
+/* ── Ruled lines (exercise-book background) ────────────────────── */
+.editor-wrap.show-ruled #editor {
+  --rule-color: var(--border);
+  --lh: calc(16px * 1.7); /* must match #editor font-size * line-height */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--lh) - 1px),
+    var(--rule-color) calc(var(--lh) - 1px),
+    var(--rule-color) var(--lh)
+  );
+  background-size: 100% var(--lh);
 }
 
 /* ── Status Bar ────────────────────────────────────────────────── */
@@ -432,8 +474,7 @@ button:active {
     padding: 6px 8px;
   }
   #editor {
-    padding: 16px;
-    font-size: 16px;
+    padding: 24px;
   }
   /* Prevent iOS Safari from zooming on input focus (requires font-size >= 16px) */
   .toolbar-center input {
