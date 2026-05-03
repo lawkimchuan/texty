@@ -16,6 +16,15 @@ const editor = document.getElementById('editor');
 const filenameInput = document.getElementById('filename-input');
 const fileInput = document.getElementById('file-input');
 
+// ── Filename field helpers ─────────────────────────────────────────
+// The input shows only the basename; .txt is a fixed suffix label.
+function getFilename() {
+  return normalizeFilename(filenameInput.value.trim());
+}
+function setFilename(fullName) {
+  filenameInput.value = fullName.replace(/\.txt$/i, '');
+}
+
 const btnNew = document.getElementById('btn-new');
 const btnOpenDevice = document.getElementById('btn-open-device');
 const btnOpenServer = document.getElementById('btn-open-server');
@@ -62,7 +71,7 @@ function showApp() {
 btnNew.addEventListener('click', () => {
   if (editor.value.trim() && !confirm('Discard current document and start new?')) return;
   editor.value = '';
-  filenameInput.value = 'untitled.txt';
+  setFilename('untitled.txt');
   localFileHandle = null;
   updateCounts();
   setStatus('New document');
@@ -82,7 +91,7 @@ btnOpenDevice.addEventListener('click', async () => {
       const file = await handle.getFile();
       const text = await file.text();
       editor.value = text;
-      filenameInput.value = sanitizeFilename(file.name);
+      setFilename(sanitizeFilename(file.name));
       updateCounts();
       updateLineNumbers();
       setStatus(`Opened "${file.name}" from device`);
@@ -103,7 +112,7 @@ fileInput.addEventListener('change', async () => {
   fileInput.value = ''; // reset so same file can be re-opened
   const text = await file.text();
   editor.value = text;
-  filenameInput.value = sanitizeFilename(file.name);
+  setFilename(sanitizeFilename(file.name));
   localFileHandle = null;
   updateCounts();
   updateLineNumbers();
@@ -115,8 +124,8 @@ fileInput.addEventListener('change', async () => {
 btnSaveServer.addEventListener('click', saveToServer);
 
 async function saveToServer() {
-  const filename = normalizeFilename(filenameInput.value.trim());
-  filenameInput.value = filename;
+  const filename = getFilename();
+  setFilename(filename);
 
   btnSaveServer.disabled = true;
   btnSaveServer.textContent = 'Saving…';
@@ -141,8 +150,8 @@ async function saveToServer() {
 
 // ── Download to Device ─────────────────────────────────────────────
 btnDownload.addEventListener('click', async () => {
-  const filename = normalizeFilename(filenameInput.value.trim());
-  filenameInput.value = filename;
+  const filename = getFilename();
+  setFilename(filename);
 
   // Try save-back to original local file (Chromium desktop only)
   if (localFileHandle) {
@@ -246,7 +255,7 @@ async function openFromServer(filename) {
     const res = await apiFetch('load', { filename });
     if (res.ok) {
       editor.value = res.data?.content ?? '';
-      filenameInput.value = filename;
+      setFilename(filename);
       localFileHandle = null;
       updateCounts();
       updateLineNumbers();
@@ -270,7 +279,7 @@ async function renameOnServer(oldName) {
   try {
     const res = await apiFetch('rename', { oldFilename: oldName, newFilename: newName });
     if (res.ok) {
-      if (filenameInput.value === oldName) filenameInput.value = newName;
+      if (getFilename() === oldName) setFilename(newName);
       setStatus(`Renamed "${oldName}" to "${newName}"`);
       loadFileList();
     } else {

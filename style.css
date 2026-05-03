@@ -96,21 +96,39 @@ body {
   min-width: 120px;
 }
 
-.toolbar-center input {
-  width: 100%;
+.filename-wrap {
+  display: flex;
+  align-items: center;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  color: var(--fg);
-  padding: 5px 8px;
   border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  outline: none;
+  padding: 0 8px 0 0;
   transition: border-color 0.15s;
 }
 
-.toolbar-center input:focus {
+.filename-wrap:focus-within {
   border-color: var(--accent);
+}
+
+.toolbar-center input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  padding: 5px 4px 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+}
+
+.filename-ext {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-muted);
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── Buttons ───────────────────────────────────────────────────── */
@@ -462,8 +480,8 @@ button:active {
   #editor {
     padding: 24px;
   }
-  /* Prevent iOS Safari from zooming on input focus (requires font-size >= 16px) */
-  .toolbar-center input {
+  .toolbar-center input,
+  .filename-ext {
     font-size: 16px;
   }
   .overlay-box {
