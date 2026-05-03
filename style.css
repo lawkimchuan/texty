@@ -328,20 +328,6 @@ button:active {
     color 0.2s;
 }
 
-/* ── Ruled lines (exercise-book background) ────────────────────── */
-.editor-wrap.show-ruled #editor {
-  --rule-color: var(--border);
-  --lh: calc(16px * 1.7); /* must match #editor font-size * line-height */
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(var(--lh) - 1px),
-    var(--rule-color) calc(var(--lh) - 1px),
-    var(--rule-color) var(--lh)
-  );
-  background-size: 100% var(--lh);
-}
-
 /* ── Status Bar ────────────────────────────────────────────────── */
 .status-bar {
   display: flex;

@@ -9,7 +9,6 @@ const API = 'api.php';
 
 const LS_THEME = 'pte_theme';
 const LS_LINE_NUMBERS = 'pte_line_numbers';
-const LS_RULED = 'pte_ruled';
 
 // ── Element refs ───────────────────────────────────────────────────
 const appEl = document.getElementById('app');
@@ -24,7 +23,6 @@ const btnSaveServer = document.getElementById('btn-save-server');
 const btnDownload = document.getElementById('btn-download');
 const btnTheme = document.getElementById('btn-theme');
 const btnLineNumbers = document.getElementById('btn-line-numbers');
-const btnRuled = document.getElementById('btn-ruled');
 
 const editorWrap = document.querySelector('.editor-wrap');
 const lineNumbers = document.getElementById('line-numbers');
@@ -48,7 +46,6 @@ let localFileHandle = null;
 (function init() {
   applyTheme(localStorage.getItem(LS_THEME) || 'light');
   applyLineNumbers(localStorage.getItem(LS_LINE_NUMBERS) === 'true');
-  applyRuled(localStorage.getItem(LS_RULED) === 'true');
   showApp();
   registerServiceWorker();
 })();
@@ -308,15 +305,7 @@ editor.addEventListener('input', () => {
 
 editor.addEventListener('scroll', () => {
   lineNumbers.scrollTop = editor.scrollTop;
-  syncRuledBackground();
 });
-
-function syncRuledBackground() {
-  if (!editorWrap.classList.contains('show-ruled')) return;
-  const lh = parseFloat(getComputedStyle(editor).lineHeight);
-  const offset = (24 - editor.scrollTop) % lh;
-  editor.style.backgroundPositionY = (offset <= 0 ? offset + lh : offset) + 'px';
-}
 
 // ── Theme Toggle ───────────────────────────────────────────────────
 btnTheme.addEventListener('click', () => {
@@ -335,20 +324,6 @@ function applyLineNumbers(on) {
   btnLineNumbers.style.color = on ? 'var(--accent)' : '';
   localStorage.setItem(LS_LINE_NUMBERS, String(on));
   if (on) updateLineNumbers();
-}
-
-// ── Ruled Lines Toggle ────────────────────────────────────────────
-btnRuled.addEventListener('click', () => {
-  applyRuled(!editorWrap.classList.contains('show-ruled'));
-});
-
-function applyRuled(on) {
-  editorWrap.classList.toggle('show-ruled', on);
-  btnRuled.setAttribute('aria-pressed', String(on));
-  btnRuled.style.color = on ? 'var(--accent)' : '';
-  localStorage.setItem(LS_RULED, String(on));
-  if (on) syncRuledBackground();
-  else editor.style.backgroundPositionY = '';
 }
 
 let _mirror = null;
