@@ -156,31 +156,12 @@ button:active {
   opacity: 0.8;
 }
 
-#btn-save-server {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-#btn-save-server:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
 #btn-save-server:disabled {
   background: #999;
   border-color: #999;
   color: #fff;
   cursor: not-allowed;
   opacity: 0.65;
-}
-
-#btn-theme {
-  font-size: 16px;
-  padding: 4px 8px;
-  border: none;
-  background: transparent;
-}
-#btn-theme:hover {
-  background: var(--btn-hover);
 }
 
 /* ── Sidebar ───────────────────────────────────────────────────── */

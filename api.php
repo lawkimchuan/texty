@@ -80,10 +80,10 @@ function handleList(): void
 {
     $files = [];
     foreach (glob(FILES_DIR . '/*.txt') ?: [] as $f) {
-        $files[] = basename($f);
+        $files[] = ['name' => basename($f), 'mtime' => filemtime($f)];
     }
-    sort($files);
-    respond(true, 'OK', 200, ['files' => $files]);
+    usort($files, fn($a, $b) => $b['mtime'] <=> $a['mtime']);
+    respond(true, 'OK', 200, ['files' => array_column($files, 'name')]);
 }
 
 function handleDelete(array $body): void

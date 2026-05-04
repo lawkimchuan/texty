@@ -32,6 +32,7 @@ const btnSaveServer = document.getElementById('btn-save-server');
 const btnDownload = document.getElementById('btn-download');
 const btnTheme = document.getElementById('btn-theme');
 const btnLineNumbers = document.getElementById('btn-line-numbers');
+const btnSelectAll = document.getElementById('btn-select-all');
 
 const editorWrap = document.querySelector('.editor-wrap');
 const lineNumbers = document.getElementById('line-numbers');
@@ -316,6 +317,12 @@ editor.addEventListener('scroll', () => {
   lineNumbers.scrollTop = editor.scrollTop;
 });
 
+// ── Select All ────────────────────────────────────────────────────
+btnSelectAll.addEventListener('click', () => {
+  editor.focus();
+  editor.select();
+});
+
 // ── Theme Toggle ───────────────────────────────────────────────────
 btnTheme.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
@@ -390,7 +397,7 @@ if (typeof ResizeObserver !== 'undefined') {
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem(LS_THEME, theme);
-  btnTheme.textContent = theme === 'dark' ? '🌙' : '☀️';
+  btnTheme.textContent = theme === 'dark' ? 'Dark' : 'Light';
   if (metaThemeColor) metaThemeColor.content = theme === 'dark' ? '#1a1a1a' : '#f5f5f0';
 }
 
